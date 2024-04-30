@@ -86,7 +86,7 @@ def next_num(grid):
     state = 0  # {0: not in a numeric area; 1: in a numeric area}
     num = ""
     for i, row in enumerate(grid):
-        for j, elem in enumerate(row):
+        for j, elem in enumerate(row + "."):
             match (state, elem):
                 case (0, x) if x.isdigit():
                     num = num + elem
