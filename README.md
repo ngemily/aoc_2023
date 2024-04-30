@@ -102,3 +102,24 @@ def next_num(grid):
         state = 0
         num = ""
 ```
+## Day 4
+
+A spin on the factorial function, where instead of being computed the value of
+`fact(n)` is given discretely.
+
+Wrapping the `scratch_fact` function allows us to perform a closure over
+`scratch_map`, which allows it to be compiled for any given starting set of
+scratch cards (or discrete function `fact(n)`).
+
+```python
+def get_scratcher(scratch_map):
+    # seed the 'factorial' function with the lookup table scratch_map
+    @cache
+    def scratch_fact(n):
+        acc = 0
+        for i in scratch_map.get(n, set()):
+            acc = acc + 1 + scratch_fact(i)
+        return acc
+
+    return scratch_fact
+```
