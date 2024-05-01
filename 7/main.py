@@ -121,4 +121,14 @@ def pt_1():
         )
     print(winnings)
 
-pt_1()  # 256448566
+# pt_1()  # 256448566
+
+hands = starmap(
+    lambda cards, bid: Hand(cards, int(bid)), map(lambda s: s.split(), ss)
+)
+winnings = reduce(
+    # t = (rank, hand)
+    lambda acc, t: acc + (t[0] + 1) * t[1].bid, enumerate(sorted(hands)), 0
+)
+print(winnings)
+
