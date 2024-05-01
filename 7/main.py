@@ -47,6 +47,9 @@ class Hand:
     def __init__(self, cards: str, bid: int):
         """Determine the type of the hand by looking at the cards"""
 
+        wildcards = cards.count("J")
+        cards = cards.replace("J", "")
+
         counts = list(map(lambda c: cards.count(c), set(cards)))
         frequencies = {elem: counts.count(elem) for elem in counts}
 
