@@ -126,11 +126,11 @@ def pt_1():
         hands = starmap(
             lambda cards, bid: Hand(cards, int(bid)), map(lambda s: s.split(), fh)
         )
-        winnings = reduce(
-            # t = (rank, hand)
-            lambda acc, t: acc + (t[0] + 1) * t[1].bid,
-            enumerate(sorted(hands)),
-            0,
+        winnings = sum(
+            starmap(
+                lambda rank, hand: (rank + 1) * hand.bid,
+                enumerate(sorted(hands)),
+            )
         )
     print(winnings)
 
@@ -141,11 +141,11 @@ def pt_2():
             lambda cards, bid: Hand(cards.replace("J", "*"), int(bid)),
             map(lambda s: s.split(), fh),
         )
-        winnings = reduce(
-            # t = (rank, hand)
-            lambda acc, t: acc + (t[0] + 1) * t[1].bid,
-            enumerate(sorted(hands)),
-            0,
+        winnings = sum(
+            starmap(
+                lambda rank, hand: (rank + 1) * hand.bid,
+                enumerate(sorted(hands)),
+            )
         )
     print(winnings)
 
