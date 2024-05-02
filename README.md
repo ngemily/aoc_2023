@@ -1,5 +1,13 @@
 # Advent of Code 2023
 
+Notes on programming style
+
+- use of 'let-over-lambda' style programming
+- structural pattern matching
+- `itertools.starmap` for when instead of 1-to-1 mappings, we get 1-to-n (n > 1)
+    mappings, usually handled with lambda functions that take more than one
+    variable
+
 ## Day 1
 
 Parameterizing function `first_alpha` to achieve `last_alpha`.
