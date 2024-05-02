@@ -21,6 +21,7 @@ class Card:
         "4": 11,
         "3": 12,
         "2": 13,
+        "*": 14,
     }
 
     value: str
@@ -47,11 +48,20 @@ class Hand:
     def __init__(self, cards: str, bid: int):
         """Determine the type of the hand by looking at the cards"""
 
-        wildcards = cards.count("J")
-        cards = cards.replace("J", "")
+        wildcards = cards.count("*")
 
-        counts = list(map(lambda c: cards.count(c), set(cards)))
+        counts = list(map(lambda c: cards.count(c), set(cards.replace("*", ""))))
         frequencies = {elem: counts.count(elem) for elem in counts}
+
+        if cards == "*****":
+            frequencies[5] = 1
+        else:
+            # add all wildcards to the kind of card that we have most of
+            max_key = max(frequencies.keys())
+            frequencies[max_key] = frequencies[max_key] - 1
+            frequencies[max_key + wildcards] = (
+                frequencies.get(max_key + wildcards, 0) + 1
+            )
 
         match frequencies:
             case {5: 1}:
@@ -110,6 +120,7 @@ ss = [
     "QQQJA 483",
 ]
 
+
 def pt_1():
     with open("input.txt") as fh:
         hands = starmap(
@@ -117,18 +128,27 @@ def pt_1():
         )
         winnings = reduce(
             # t = (rank, hand)
-            lambda acc, t: acc + (t[0] + 1) * t[1].bid, enumerate(sorted(hands)), 0
+            lambda acc, t: acc + (t[0] + 1) * t[1].bid,
+            enumerate(sorted(hands)),
+            0,
         )
     print(winnings)
 
-# pt_1()  # 256448566
 
-hands = starmap(
-    lambda cards, bid: Hand(cards, int(bid)), map(lambda s: s.split(), ss)
-)
-winnings = reduce(
-    # t = (rank, hand)
-    lambda acc, t: acc + (t[0] + 1) * t[1].bid, enumerate(sorted(hands)), 0
-)
-print(winnings)
+def pt_2():
+    with open("input.txt") as fh:
+        hands = starmap(
+            lambda cards, bid: Hand(cards.replace("J", "*"), int(bid)),
+            map(lambda s: s.split(), fh),
+        )
+        winnings = reduce(
+            # t = (rank, hand)
+            lambda acc, t: acc + (t[0] + 1) * t[1].bid,
+            enumerate(sorted(hands)),
+            0,
+        )
+    print(winnings)
 
+
+pt_1()  # 256448566
+pt_2()  # 254412181
