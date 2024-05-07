@@ -131,3 +131,15 @@ def get_scratcher(scratch_map):
 
     return scratch_fact
 ```
+
+## Day 19
+
+Recursive generators
+```python
+def walk(part, it):
+    cond, dst = next(it)
+    while not cond(part):
+        cond, dst = next(it)
+    yield dst
+    yield from walk(part, iter(d[dst]))
+```
