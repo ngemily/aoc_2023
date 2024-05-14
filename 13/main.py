@@ -1,6 +1,8 @@
 from itertools import starmap, chain
 from functools import partial
 
+import operator
+
 
 def is_symmetric_pt1(l):
     """Returns index at which `l` is symmetric, `None` if not symmetric"""
@@ -9,7 +11,7 @@ def is_symmetric_pt1(l):
         lh = iter(reversed(l[:i]))
         rh = iter(l[i:])
         # special case of pt2 where num_sumdges is 0
-        return all(starmap(lambda x, y: x == y, zip(lh, rh)))
+        return all(starmap(operator.eq, zip(lh, rh)))
 
     for i in range(1, len(l)):
         if is_symmetric_about(l, i):
@@ -28,13 +30,13 @@ def is_symmetric_pt2(l, num_smudges=0):
         lh = iter(reversed(l[:i]))
         rh = iter(l[i:])
 
-        def _(a, b):
-            return list(starmap(lambda x, y: x == y, zip(a, b)))
-
-        # assumes `l` is 2-dimensional iterable
-        # can generalize to n-dimensional?
         return (
-            list(chain.from_iterable(starmap(_, zip(lh, rh)))).count(False)
+            list(
+                starmap(
+                    operator.eq,
+                    zip(chain.from_iterable(lh), chain.from_iterable(rh)),
+                )
+            ).count(False)
             == num_smudges
         )
 
