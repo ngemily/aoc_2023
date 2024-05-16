@@ -143,3 +143,111 @@ def walk(part, it):
     yield dst
     yield from walk(part, iter(d[dst]))
 ```
+
+# Day 20
+
+Decorating functions without `@` syntactic sugar.
+
+I first implemented the pulse broadcasting without trying to count the number of
+high and low pulses.  I wanted to see if I could instrument the code with
+minimal impact to the core logic.
+
+In the following example, function `foo` is bound to an incrementing counter.
+```python
+def get_counter():
+    count = 0
+    def counter():
+        nonlocal count
+        count = count + 1
+        return count
+    return counter
+
+def counted(f):
+    counter =  get_counter()
+    def _(*args, **kwargs):
+        counter()  # <----- how can this be accessed
+        return f(*args, **kwargs)
+    return _
+
+@counted
+def foo():
+    pass
+
+foo()
+foo()
+foo()
+```
+
+But it is bound to exactly one counter for the duration of the program.  In our
+case, we wish to reset the counter at each button press.
+
+```python
+foo1 = counted(foo)
+foo1()
+foo1()
+foo1()
+foo2 = counted(foo)
+foo2()
+foo2()
+foo2()
+```
+
+Now we have two running counts, one for each explicitly (rather than implicitly
+as before) wrapped instance of `foo`.
+
+In the code I ended up writing, I "wrapped" the functions inline; this makes it
+quite clear that the wrappers are acting on the callable functions, which are
+still called with the same arguments as before.  E.g. `counted` modifies the
+function `process_pulse` in some way.  See [day 20](20/main.py) for full
+implementation.
+
+```python
+for dst, pulse in counted(process_pulse, pc)(dst, pulse):
+    q.append((dst, pulse))
+# ...
+lo, hi = count(broadcast_pulse)("broadcaster", False)
+```
+
+As to how to retrieve the value from our counter, it depends on whether we want
+the return value of our wrapped function and where our wrapped function might be
+called from.
+
+```python
+# don't return the internal function's return value
+def counted(f):
+    counter =  get_counter()
+    def _(*args, **kwargs):
+        counter()
+        f(*args, **kwargs)
+        return counter
+    return _
+
+# return both the counter and the internal function's return value
+def counted(f):
+    counter =  get_counter()
+    def _(*args, **kwargs):
+        counter()
+        return counter, f(*args, **kwargs)
+    return _
+
+# accept the counter as an argument
+# caller is responsible for maintaining a reference to counter to later retrieve
+# its value
+def counted(f, counter):
+    def _(*args, **kwargs):
+        counter()
+        return f(*args, **kwargs)
+    return _
+
+```
+
+For example, in this puzzle we still need to perform the whole activity of
+propagating pulses, but what we're interested in is the measurement of a
+side-effect.
+
+```python
+# Don't need the return value of `broadcast_pulse`,
+# but it does things that we want to observe,
+# and want we want is returned by calling `count(broadcast_pulse(...))`.
+lo, hi = count(broadcast_pulse)("broadcaster", False)
+```
